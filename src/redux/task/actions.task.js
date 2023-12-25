@@ -1,22 +1,10 @@
 import axios from "axios";
-import { isError, isLoading } from "../actions.common";
+import { DONEFUNCTION, isLoading } from "../actions.common";
 import { TASKS, TASKBACKENDURL } from "./actionTypes.task";
 
 export const fetchTasks = (payload) => {
   return { type: TASKS, payload };
 };
-
-// const updateTask = (payload) => {
-//   return { type: EDITTASK, payload };
-// };
-
-// const deleteTask = (payload) => {
-//   return { type: DELETETASK, payload };
-// };
-
-// const completeTask = (payload) => {
-//   return { type: COMPLETETASK, payload };
-// };
 
 export const GETTASKSCALL = async (dispatch, token) => {
   dispatch(isLoading());
@@ -27,9 +15,9 @@ export const GETTASKSCALL = async (dispatch, token) => {
       },
     });
     dispatch(fetchTasks(request.data));
+    DONEFUNCTION(dispatch);
     return request;
   } catch (err) {
-    dispatch(isError(err.message));
     return err.response;
   }
 };
@@ -47,9 +35,9 @@ export const ADDTASKCALL = async (dispatch, token, payload) => {
       }
     );
     GETTASKSCALL(dispatch, token);
+    DONEFUNCTION(dispatch);
     return request;
   } catch (err) {
-    dispatch(isError(err.message));
     return err.response;
   }
 };
@@ -63,9 +51,9 @@ export const UPDATETASKCALL = async (dispatch, token, id, payload) => {
       },
     });
     GETTASKSCALL(dispatch, token);
+    DONEFUNCTION(dispatch);
     return request;
   } catch (err) {
-    dispatch(isError(err.message));
     return err.response;
   }
 };
@@ -79,52 +67,49 @@ export const DELETETASKCALL = async (dispatch, token, id) => {
       },
     });
     GETTASKSCALL(dispatch, token);
+    DONEFUNCTION(dispatch);
     return request;
   } catch (err) {
-    dispatch(isError(err.message));
     return err.response;
   }
 };
 
-export const COMPLETETASKCALL = async (dispatch, token, id) => {
+export const COMPLETETASKCALL = async (dispatch, token, element) => {
   dispatch(isLoading());
-  // console.log(token, id);
   try {
-    const request = await axios.post(`${TASKBACKENDURL}/complete/${id}`, {
-      headers: {
-        authorization: token,
-      },
-    });
+    const request = await axios.post(
+      `${TASKBACKENDURL}/complete/${element._id}`,
+      element,
+      {
+        headers: {
+          authorization: token,
+        },
+      }
+    );
     GETTASKSCALL(dispatch, token);
+    DONEFUNCTION(dispatch);
     return request;
   } catch (err) {
-    dispatch(isError(err.message));
     return err.response;
   }
 };
 
-export const NOTIFYTASKCALL = async (dispatch, token, id) => {
+export const NOTIFYTASKCALL = async (dispatch, token, element) => {
   dispatch(isLoading());
+  console.log(element, element._id);
   try {
-    const request = await axios.post(`${TASKBACKENDURL}/reminder/${id}`, {
-      headers: {
-        authorization: token,
-      },
-    });
+    const request = await axios.post(
+      `${TASKBACKENDURL}/reminder/${element._id}`,
+      element,
+      {
+        headers: {
+          authorization: token,
+        },
+      }
+    );
     return request;
   } catch (err) {
-    dispatch(isError(err.message));
     return err.response;
   }
 };
 
-export const SORTBYDEADLINE = (dispatch, tasks) => {
-  const sortedArray = tasks.sort((a, b) => {
-    if (a.deadline && b.deadline) {
-      return new Date(a.deadline) - new Date(b.deadline);
-    }
-    return a;
-  });
-
-  dispatch(fetchTasks({ tasks: sortedArray }));
-};

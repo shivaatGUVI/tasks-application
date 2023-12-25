@@ -1,5 +1,5 @@
 export const LOADING = "loading";
-export const ERROR = "error";
+export const RESET = "reset";
 export const DONE = "done";
 
-export const BACKENDURL = "http://localhost:8080/";
+export const BACKENDURL = "https://sore-cyan-deer-garb.cyclic.app/";

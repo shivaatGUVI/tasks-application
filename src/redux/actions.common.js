@@ -1,12 +1,15 @@
 import axios from "axios";
-import { BACKENDURL, ERROR, LOADING, DONE } from "./actionTypes.common";
+import { BACKENDURL, LOADING, DONE, RESET } from "./actionTypes.common";
 
 export const isLoading = () => {
   return { type: LOADING };
 };
 
-export const isError = (payload) => {
-  return { type: ERROR, payload };
+export const LoginError = "You are logged out. Please login again";
+export const ServerError = "Server: Please revisit after sometime";
+
+export const DONEFUNCTION = (dispatch) => {
+  dispatch({ type: DONE });
 };
 
 export const CALLCOMPLETEDTASKS = async (dispatch, token) => {
@@ -17,10 +20,34 @@ export const CALLCOMPLETEDTASKS = async (dispatch, token) => {
         authorization: token,
       },
     });
-    dispatch({ type: DONE });
+    DONEFUNCTION(dispatch);
     return request;
   } catch (err) {
-    dispatch(isError(err.message));
     return err.response;
+  }
+};
+
+export const RESPONSEFUNCTION = (res) => {
+  if (!res) {
+    throw new Error(ServerError);
+  }
+
+  if (res.status === 500) {
+    throw new Error(LoginError);
+  }
+
+  if (res.status !== 200) {
+    throw new Error(res.data.error);
+  }
+};
+
+export const ERRORFUNCTION = (dispatch, err, navigate) => {
+  if (err.message === LoginError || err.message === ServerError) {
+    setTimeout(() => {
+      dispatch({ type: RESET });
+      navigate("/login");
+    }, 1500);
+  } else {
+    dispatch({ type: DONE });
   }
 };
