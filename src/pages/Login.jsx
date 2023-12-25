@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import { GETUSERCALL } from "../redux/user/actions.user";
+import { ERRORFUNCTION, RESPONSEFUNCTION } from "../redux/actions.common";
 
 const initialState = {
   email: "",
@@ -30,10 +31,7 @@ export default function Login() {
 
     GETUSERCALL(dispatch, "login", form)
       .then((res) => {
-        if (res.status !== 200) {
-          throw new Error(res.data.error);
-        }
-
+        RESPONSEFUNCTION(res);
         if (res.status === 200) {
           toast({
             title: "User logged in",
@@ -42,7 +40,7 @@ export default function Login() {
             duration: 2000,
             isClosable: true,
           });
-          navigate("/");
+          navigate("/dashboard");
         }
       })
       .catch((err) => {
@@ -53,6 +51,7 @@ export default function Login() {
           duration: 3000,
           isClosable: true,
         });
+        ERRORFUNCTION(dispatch, err, navigate);
       })
       .finally(() => {
         setIsLoading(false);
@@ -70,7 +69,7 @@ export default function Login() {
       <Box margin="auto" width={["70%", "60%", "55%", "40%"]}>
         <form onSubmit={(e) => submitHandler(e)}>
           <FormControl isRequired marginBottom={["0.8rem"]}>
-            <FormLabel fontSize={{ base: "13px", md: "14px", lg: "16px" }}>
+            <FormLabel fontSize={{ base: "0.7em", md: "0.8em", lg: "0.9em" }}>
               Email Address
             </FormLabel>
             <Input
@@ -80,11 +79,11 @@ export default function Login() {
               variant="filled"
               type="email"
               placeholder="Email address"
-              fontSize={{ base: "14px", md: "16px", lg: "17px" }}
+              fontSize={{ base: "0.7em", md: "0.8em", lg: "0.9em" }}
             />
           </FormControl>
           <FormControl isRequired>
-            <FormLabel fontSize={{ base: "13px", md: "14px", lg: "16px" }}>
+            <FormLabel fontSize={{ base: "0.7em", md: "0.8em", lg: "0.9em" }}>
               Password
             </FormLabel>
             <Input
@@ -94,7 +93,7 @@ export default function Login() {
               variant="filled"
               type="password"
               placeholder="Password"
-              fontSize={{ base: "14px", md: "16px", lg: "17px" }}
+              fontSize={{ base: "0.7em", md: "0.8em", lg: "0.9em" }}
             />
           </FormControl>
           <br />
@@ -104,7 +103,7 @@ export default function Login() {
             loadingText="Loading"
             type="submit"
             cursor="pointer"
-            fontSize={{ base: "14px", md: "16px", lg: "17px" }}
+            fontSize={{ base: "0.7em", md: "0.8em", lg: "0.9em" }}
             isDisabled={form.email === "" || form.password === ""}
             bg="#31304D"
             border="none"

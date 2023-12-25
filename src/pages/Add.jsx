@@ -11,6 +11,7 @@ import { useState } from "react";
 import { ADDTASKCALL } from "../redux/task/actions.task";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { ERRORFUNCTION, RESPONSEFUNCTION } from "../redux/actions.common";
 
 const initialState = {
   name: "",
@@ -37,10 +38,7 @@ export default function Add() {
 
     ADDTASKCALL(dispatch, token, form)
       .then((res) => {
-        if (res.status !== 200) {
-          throw new Error(res.data.error);
-        }
-
+        RESPONSEFUNCTION(res);
         if (res.status === 200) {
           toast({
             title: "Completed",
@@ -49,6 +47,7 @@ export default function Add() {
             duration: 2000,
             isClosable: true,
           });
+          navigate("/dashboard");
         }
       })
       .catch((err) => {
@@ -59,18 +58,17 @@ export default function Add() {
           duration: 3000,
           isClosable: true,
         });
+        ERRORFUNCTION(dispatch, err, navigate);
       })
       .finally(() => {
         setIsLoading(!isLoading);
+        setForm(initialState);
       });
-    setForm(initialState);
-    navigate("/");
   };
 
   const inputHandler = (e) => {
     const name = e.target.name;
     const value = e.target.value;
-
     setForm({ ...form, [name]: value });
   };
 

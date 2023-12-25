@@ -11,7 +11,6 @@ import { useRef } from "react";
 
 export default function AlertDelete({
   isDeleteOpen,
-  onDeleteOpen,
   onDeleteClose,
   isRemove,
   remove,

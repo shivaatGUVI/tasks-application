@@ -18,10 +18,10 @@ export default function AlertUpdate({
   isEdit,
   edit,
   CONFIRMUPDATECALL,
-  el,
+  element,
 }) {
   const cancelRef = useRef();
-  const [form, setForm] = useState(el);
+  const [form, setForm] = useState(element);
 
   const inputHandler = (e) => {
     const name = e.target.name;

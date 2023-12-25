@@ -1,24 +1,19 @@
-import { ERROR, LOADING, DONE } from "./actionTypes.common";
+import { LOADING, DONE, RESET } from "./actionTypes.common";
 
 const initialState = {
   isLoading: false,
-  isError: { state: false, error: "" },
 };
 
-export const reducer = (state = initialState, { type, payload }) => {
+export const reducer = (state = initialState, { type }) => {
   switch (type) {
     case LOADING: {
       return { ...state, isLoading: !state.isLoading };
     }
-    case ERROR: {
-      return {
-        ...state,
-        isLoading: !state.isLoading,
-        isError: { state: true, error: payload },
-      };
-    }
     case DONE: {
-      return { ...state, login: !state.isLoading };
+      return { ...state, isLoading: !state.isLoading };
+    }
+    case RESET: {
+      return initialState;
     }
     default: {
       return state;

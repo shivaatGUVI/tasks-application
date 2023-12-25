@@ -17,42 +17,41 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import AlertDelete from "./Alert.Delete";
 import AlertUpdate from "./AlertUpdate";
+import { useNavigate } from "react-router-dom";
+import { ERRORFUNCTION, RESPONSEFUNCTION } from "../redux/actions.common";
 
-export default function Tasks({ el }) {
+export default function Tasks({ element }) {
   const [edit, isEdit] = useState(false);
   const [remove, isRemove] = useState(false);
   const [notify, isNotify] = useState(false);
   const [complete, isComplete] = useState(false);
   const { token, user } = useSelector((store) => store.userReducer);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const toast = useToast();
   const {
     isOpen: isDeleteOpen,
     onOpen: onDeleteOpen,
     onClose: onDeleteClose,
   } = useDisclosure();
-
   const {
     isOpen: isUpdateOpen,
     onOpen: onUpdateOpen,
     onClose: onUpdateClose,
   } = useDisclosure();
 
-  const toast = useToast();
   const today = new Date();
-
-  const deadline = el.deadline ? new Date(el.deadline) : false;
-  const createdOn = new Date(el.createdOn);
-
-  const comparison = el.deadline ? deadline.getTime() < today.getTime() : false;
+  const deadline = element.deadline ? new Date(element.deadline) : false;
+  const createdOn = new Date(element.createdOn);
+  const comparison = element.deadline
+    ? deadline.getTime() < today.getTime()
+    : false;
 
   function CONFIRMDELETECALL() {
     onDeleteClose();
-    return DELETETASKCALL(dispatch, token, el._id)
+    return DELETETASKCALL(dispatch, token, element._id)
       .then((res) => {
-        if (res.status !== 200) {
-          throw new Error(res.data.error);
-        }
-
+        RESPONSEFUNCTION(res);
         if (res.status === 200) {
           toast({
             title: "Deleted",
@@ -71,6 +70,7 @@ export default function Tasks({ el }) {
           duration: 3000,
           isClosable: true,
         });
+        ERRORFUNCTION(dispatch, err, navigate);
       })
       .finally(() => {
         isRemove(false);
@@ -79,12 +79,9 @@ export default function Tasks({ el }) {
 
   function CONFIRMUPDATECALL(payload) {
     onUpdateClose();
-    return UPDATETASKCALL(dispatch, token, el._id, payload)
+    return UPDATETASKCALL(dispatch, token, element._id, payload)
       .then((res) => {
-        if (res.status !== 200) {
-          throw new Error(res.data.error);
-        }
-
+        RESPONSEFUNCTION(res);
         if (res.status === 200) {
           toast({
             title: "Updated",
@@ -103,39 +100,54 @@ export default function Tasks({ el }) {
           duration: 3000,
           isClosable: true,
         });
+        ERRORFUNCTION(dispatch, err, navigate);
       })
       .finally(() => {
         isEdit(false);
       });
   }
 
-  function onNotifyClick() {
+  function NOTIFYCLICKHANDLER() {
     isNotify(!notify);
-    NOTIFYTASKCALL(dispatch, token, el._id).then((res) => {
-      toast({
-        title: "Mailed",
-        description: `The reminder mail is sent to ${user.email}`,
-        status: "success",
-        duration: 2000,
-        isClosable: true,
+    NOTIFYTASKCALL(dispatch, token, element)
+      .then((res) => {
+        RESPONSEFUNCTION(res);
+
+        if (res.status === 200) {
+          toast({
+            title: "Mailed",
+            description: `The reminder mail is sent to ${user.email}`,
+            status: "success",
+            duration: 2000,
+            isClosable: true,
+          });
+        }
+      })
+      .catch((err) => {
+        toast({
+          title: "Something happened",
+          description: err.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        ERRORFUNCTION(dispatch, err, navigate);
+      })
+      .finally(() => {
+        isNotify(!notify);
       });
-      isNotify(!notify);
-    });
   }
 
-  function onRemoveClick() {
+  function DELETECLICKHANDLER() {
     isRemove(!remove);
     onDeleteOpen();
   }
 
-  function onCompleteClick() {
+  function COMPLETECLICKHANDLER() {
     isComplete(!complete);
-    COMPLETETASKCALL(dispatch, token, el._id)
+    COMPLETETASKCALL(dispatch, token, element)
       .then((res) => {
-        if (res.status !== 200) {
-          throw new Error(res.data.error);
-        }
-
+        RESPONSEFUNCTION(res);
         if (res.status === 200) {
           toast({
             title: "Completed",
@@ -154,56 +166,66 @@ export default function Tasks({ el }) {
           duration: 3000,
           isClosable: true,
         });
+        ERRORFUNCTION(dispatch, err, navigate);
       })
       .finally(() => {
         isComplete(false);
       });
   }
 
-  function onEditClick() {
+  function EDITCLICKHANDLER() {
     isEdit(!edit);
     onUpdateOpen();
   }
 
-  console.log(el);
-
   return (
     <>
       <Flex
+        flexDirection={["column", "column", "row"]}
         border={comparison ? "1.5px solid red" : ""}
         backgroundColor={["#F0ECE5"]}
-        padding={["1.5rem 2rem"]}
+        padding={["0.7rem 1.2rem", "1.1rem 1.6rem", "1.5rem 2rem"]}
         borderRadius={["0.5rem"]}
         justifyContent={["space-between"]}
         alignItems={["center"]}
+        gap={["0.8rem", "1rem", "0rem"]}
       >
-        <Flex flexDirection={["column"]} gap={["0.1rem"]} width={["65%"]}>
+        <Flex
+          flexDirection={["column"]}
+          gap={["0.1rem"]}
+          width={["100%", "100%", "60%"]}
+        >
           <Heading
             as="h3"
-            fontSize={["1.1em"]}
+            fontSize={["0.7em", "0.9em", "1.1em"]}
+            letterSpacing={["0.065em", "0.045em", "0.025em"]}
             textTransform={["uppercase"]}
-            letterSpacing={["0.025em"]}
             noOfLines={[1]}
           >
-            {el.name}
+            {element.name}
           </Heading>
           <Text
             as="p"
             fontStyle={["italic"]}
-            fontSize={["0.8em"]}
-            marginBottom={["0.3rem"]}
+            fontSize={["0.4em", "0.6em", "0.8em"]}
+            marginBottom={["0.1rem", "0.2rem", "0.3rem"]}
           >
             {createdOn.toDateString()}
           </Text>
-          <Text as="p" noOfLines={[3]} marginBottom={["0.6rem"]}>
-            {el.description}
+          <Text
+            as="p"
+            fontSize={["0.6em", "0.8em", "0.9em"]}
+            marginBottom={["0.2rem", "0.4rem", "0.6rem"]}
+            noOfLines={[3]}
+          >
+            {element.description}
           </Text>
-          {el.deadline ? (
+          {element.deadline ? (
             <Text
               as="p"
-              fontSize={["0.9em"]}
               color={["red.500"]}
               fontWeight={["500"]}
+              fontSize={["0.5em", "0.7em", "0.9em"]}
             >
               {deadline.toDateString()}
             </Text>
@@ -212,41 +234,41 @@ export default function Tasks({ el }) {
           )}
         </Flex>
         <Flex
-          width={["25%"]}
-          justifyContent={["space-between"]}
+          width={["60%", "50%", "40%", "30%"]}
+          justifyContent={["space-evenly"]}
           alignItems={["center"]}
         >
           <Button
             cursor={["pointer"]}
-            onClick={onCompleteClick}
+            onClick={COMPLETECLICKHANDLER}
             isLoading={complete}
-            as="FeImage"
+            size={["xs", "sm", "md"]}
           >
-            <CheckIcon w={5} h={5} color="green.700" />
+            <CheckIcon w={[3, 4, 5]} h={[3, 4, 5]} color="green.700" />
           </Button>
           <Button
             cursor={["pointer"]}
-            onClick={onEditClick}
+            onClick={EDITCLICKHANDLER}
             isLoading={edit}
-            as="FeImage"
+            size={["xs", "sm", "md"]}
           >
-            <EditIcon w={5} h={5} color="grey.500" />
+            <EditIcon w={[3, 4, 5]} h={[3, 4, 5]} color="grey.500" />
           </Button>
           <Button
-            onClick={onRemoveClick}
+            onClick={DELETECLICKHANDLER}
             isLoading={remove}
             cursor={["pointer"]}
-            as="FeImage"
+            size={["xs", "sm", "md"]}
           >
-            <DeleteIcon w={5} h={5} color="red.600" />
+            <DeleteIcon w={[3, 4, 5]} h={[3, 4, 5]} color="red.600" />
           </Button>
           <Button
             cursor={["pointer"]}
-            onClick={onNotifyClick}
+            onClick={NOTIFYCLICKHANDLER}
             isLoading={notify}
-            as="FeImage"
+            size={["xs", "sm", "md"]}
           >
-            <BellIcon w={6} h={6} color="#E57C23" />
+            <BellIcon w={[4, 5, 6]} h={[4, 5, 6]} color="#E57C23" />
           </Button>
         </Flex>
       </Flex>
@@ -264,7 +286,7 @@ export default function Tasks({ el }) {
         onUpdateClose={onUpdateClose}
         isEdit={isEdit}
         edit={edit}
-        el={el}
+        element={element}
         CONFIRMUPDATECALL={CONFIRMUPDATECALL}
       />
     </>
